@@ -64,7 +64,7 @@ public class ArvoreExpressaoAritimetica {
         return false;
     }
 
-    public static No construirArvore(List<No> vetor) {
+    /*public static No construirArvore(List<No> vetor) {
         for (;;) {
             if (!temParenteses(vetor)) {
                 break;
@@ -109,7 +109,53 @@ public class ArvoreExpressaoAritimetica {
         agruparNodos(vetor, new String[]{"+", "-"});
 
         return vetor.get(0);
+    }*/
+
+    public static No construirArvore(List<No> vetor) {
+        while (temParenteses(vetor)) {
+    
+            // encontra o fechamento do parêntese mais à esquerda
+            int fechaParenteses = -1;
+            for (int i = 0; i < vetor.size(); i++) {
+                if (vetor.get(i).valor.equals(")")) {
+                    fechaParenteses = i;
+                    break;
+                }
+            }
+            if (fechaParenteses == -1) break;
+    
+            // encontra a abertura correspondente
+            int abreParenteses = -1;
+            for (int i = fechaParenteses; i >= 0; i--) {
+                if (vetor.get(i).valor.equals("(")) {
+                    abreParenteses = i;
+                    break;
+                }
+            }
+    
+            // cria subvetor e chama recursivamente
+            List<No> sub = new ArrayList<>();
+            for (int i = abreParenteses + 1; i < fechaParenteses; i++) {
+                sub.add(vetor.get(i));
+            }
+    
+            No subArvore = construirArvore(sub);
+    
+            // substitui o trecho '( ... )' pela subárvore
+            for (int i = fechaParenteses; i >= abreParenteses; i--) {
+                vetor.remove(i);
+            }
+            vetor.add(abreParenteses, subArvore);
+        }
+    
+        // agrupa operadores restantes fora de parênteses
+        agruparNodos(vetor, new String[]{"^"});
+        agruparNodos(vetor, new String[]{"*", "/"});
+        agruparNodos(vetor, new String[]{"+", "-"});
+    
+        return vetor.get(0);
     }
+    
 
     public static void printarArvore(No raiz) {
         printarArvoreRec(raiz, "", true);
@@ -144,3 +190,13 @@ public class ArvoreExpressaoAritimetica {
         }
     }
 }
+
+/*
+ 1= 3*(4+5^2)-8/2
+ 2= 4*(3+5^2)
+ 3= (100 / (5^2)) + (8 * 3)
+ 4= (3+4)*(2^3)-(6/(3+1))
+ 5= 6 * (2 + 3 ^ 2) - (12 / (4 + 2))
+
+
+ */
