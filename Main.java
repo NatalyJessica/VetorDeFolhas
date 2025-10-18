@@ -14,6 +14,7 @@ public class Main {
         Scanner scanner = new Scanner(System.in);
         String expressao = scanner.nextLine();
 
+        ArvoreExpressaoAritimetica.validarExpressao(expressao);
         var vetor = ArvoreExpressaoAritimetica.fragmentarExpressaoAririmetica(expressao);
 
         // 🔹 Imprime o vetor de nós no console com '|'

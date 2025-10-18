@@ -13,6 +13,143 @@ public class ArvoreExpressaoAritimetica {
         }
     }
 
+      // Método único para validar toda a expressão
+    public static void validarExpressao(String expArit) throws Exception {
+        // 1. Valida se a expressão está vazia
+        if (expArit == null || expArit.trim().isEmpty()) {
+            throw new Exception("Expressão vazia ou nula");
+        }
+
+        // 2. Valida caracteres
+        String caracteresValidos = "0123456789.+-*/^() ";
+        for (char c : expArit.toCharArray()) {
+            if (caracteresValidos.indexOf(c) == -1) {
+                throw new Exception(
+                    "Caractere inválido encontrado: '" + c + "'. Apenas números, operadores (+, -, *, /, ^) e parênteses são permitidos."
+                );
+            }
+        }
+
+        // 3. Valida parênteses balanceados
+        int contador = 0;
+        for (char c : expArit.toCharArray()) {
+            if (c == '(') contador++;
+            if (c == ')') contador--;
+            if (contador < 0) {
+                throw new Exception("Parênteses desbalanceados: ')' antes de '('");
+            }
+        }
+        if (contador != 0) {
+            throw new Exception("Parênteses desbalanceados: faltam " + 
+                (contador > 0 ? "')'" : "'('"));
+        }
+
+        // 4. Valida parênteses vazios
+        if (expArit.contains("()")) {
+            throw new Exception("Parênteses vazios encontrados: ()");
+        }
+
+        // 5. Remove espaços e fragmenta para validações estruturais
+        String expLimpa = expArit.replace(" ", "");
+        String delimitadores = "+-*/^()";
+        StringTokenizer separador = new StringTokenizer(expLimpa, delimitadores, true);
+        List<No> vetorTemp = new ArrayList<>();
+
+        while (separador.hasMoreTokens()) {
+            String token = separador.nextToken();
+            if (!token.trim().isEmpty()) {
+                vetorTemp.add(new No(token));
+            }
+        }
+
+        if (vetorTemp.isEmpty()) {
+            throw new Exception("Expressão vazia após processamento");
+        }
+
+        // 6. Valida números
+        String operadores = "+-*/^()";
+        for (No no : vetorTemp) {
+            if (!operadores.contains(no.valor)) {
+                if (!ehNumero(no.valor)) {
+                    throw new Exception("Número inválido: '" + no.valor + "'");
+                }
+            }
+        }
+
+        // 7. Valida operadores consecutivos
+        for (int i = 0; i < vetorTemp.size() - 1; i++) {
+            String atual = vetorTemp.get(i).valor;
+            String proximo = vetorTemp.get(i + 1).valor;
+            
+            if (i == 0 && (atual.equals("-") || atual.equals("+"))) {
+                if (!proximo.equals("(") && !ehNumero(proximo)) {
+                    throw new Exception(
+                        "Operador '" + atual + "' no início deve ser seguido de número ou '('"
+                    );
+                }
+                continue;
+            }
+            
+            if (atual.equals("(") && (proximo.equals("-") || proximo.equals("+"))) {
+                if (i + 2 < vetorTemp.size()) {
+                    String depoisDoSinal = vetorTemp.get(i + 2).valor;
+                    if (!depoisDoSinal.equals("(") && !ehNumero(depoisDoSinal)) {
+                        throw new Exception(
+                            "Operador '" + proximo + "' após '(' deve ser seguido de número ou '('"
+                        );
+                    }
+                }
+                continue;
+            }
+            
+            if (operadores.contains(atual) && operadores.contains(proximo)) {
+                throw new Exception(
+                    "Operadores consecutivos encontrados: '" + atual + "' e '" + proximo + "'"
+                );
+            }
+        }
+
+        // 8. Valida primeiro elemento
+        String primeiro = vetorTemp.get(0).valor;
+        if (operadores.contains(primeiro) && !primeiro.equals("-") && !primeiro.equals("+")) {
+            throw new Exception(
+                "Expressão começa com operador inválido: '" + primeiro + "'"
+            );
+        }
+
+        // 9. Valida último elemento
+        String ultimo = vetorTemp.get(vetorTemp.size() - 1).valor;
+        if (operadores.contains(ultimo)) {
+            throw new Exception(
+                "Expressão termina com operador: '" + ultimo + "'"
+            );
+        }
+
+        // 10. Valida operadores com parênteses
+        for (int i = 0; i < vetorTemp.size(); i++) {
+            String atual = vetorTemp.get(i).valor;
+            
+            if (atual.equals("(") && i < vetorTemp.size() - 1) {
+                String proximo = vetorTemp.get(i + 1).valor;
+                if (operadores.contains(proximo) && !proximo.equals("-") && !proximo.equals("+")) {
+                    throw new Exception(
+                        "Operador inválido após '(': '" + proximo + "'"
+                    );
+                }
+            }
+            
+            if (atual.equals(")") && i > 0) {
+                String anterior = vetorTemp.get(i - 1).valor;
+                if (operadores.contains(anterior)) {
+                    throw new Exception(
+                        "Operador antes de ')': '" + anterior + "'"
+                    );
+                }
+            }
+        }
+    }
+
+
     public static List<No> fragmentarExpressaoAririmetica(String expArit) {
         expArit = expArit.replace(" ", "");
         String delimitadores = "+-*/^()";
