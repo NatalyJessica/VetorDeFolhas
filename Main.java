@@ -18,7 +18,6 @@ public class Main {
         try {
             var vetor = ArvoreExpressaoAritimetica.fragmentarExpressaoAririmetica(expressao);
 
-            // 🔹 Imprime o vetor de nós no console com '|'
             System.out.print("Vetor de nós: ");
             for (int i = 0; i < vetor.size(); i++) {
                 System.out.print(vetor.get(i).valor);
