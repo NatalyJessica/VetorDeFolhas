@@ -13,17 +13,6 @@ public class ArvoreExpressaoAritimetica {
         }
     }
 
-    private static boolean ehNumero(String str) {
-        if (str == null || str.isEmpty())
-            return false;
-        try {
-            Double.parseDouble(str);
-            return true;
-        } catch (NumberFormatException e) {
-            return false;
-        }
-    }
-
     public static void validarExpressao(String expArit) throws Exception {
         if (expArit == null || expArit.trim().isEmpty())
             throw new Exception("Expressão vazia ou nula");
@@ -37,12 +26,10 @@ public class ArvoreExpressaoAritimetica {
             char c = expArit.charAt(i);
             char next = (i + 1 < expArit.length()) ? expArit.charAt(i + 1) : '\0';
     
-            // caracteres válidos
             if (!Character.isDigit(c) && operadores.indexOf(c) == -1 && c != '(' && c != ')') {
                 throw new Exception("Caractere inválido: '" + c + "' na posição " + i);
             }
     
-            // parênteses balanceados
             if (c == '(') {
                 contParenteses++;
                 if (next == ')')
@@ -51,12 +38,10 @@ public class ArvoreExpressaoAritimetica {
                 contParenteses--;
                 if (contParenteses < 0)
                     throw new Exception("Parêntese ')' sem abertura em posição " + i);
-                // operador antes de ')' ?
                 if (operadores.indexOf(prev) != -1)
                     throw new Exception("Operador '" + prev + "' antes de ')' em posição " + (i - 1));
             }
     
-            // operador no início ou fim
             if (operadores.indexOf(c) != -1) {
                 if (i == 0 || i == expArit.length() - 1)
                     throw new Exception("Operador '" + c + "' em posição inválida");
@@ -68,11 +53,9 @@ public class ArvoreExpressaoAritimetica {
                     throw new Exception("Operador '" + c + "' antes de ')' em posição " + i);
             }
     
-            // número seguido de '('
             if (Character.isDigit(prev) && c == '(')
                 throw new Exception("Falta operador entre número e '(' em posição " + (i - 1));
     
-            // ')' seguido de número
             if (prev == ')' && Character.isDigit(c))
                 throw new Exception("Falta operador entre ')' e número em posição " + (i - 1));
     
@@ -133,7 +116,6 @@ public class ArvoreExpressaoAritimetica {
                 }
             }
         } else {
-            // operadores associativos à esquerda
             for (int i = 0; i < vetor.size(); i++) {
                 No atual = vetor.get(i);
                 boolean isOperador = false;
