@@ -13,7 +13,81 @@ public class ArvoreExpressaoAritimetica {
         }
     }
 
-    public static List<No> fragmentarExpressaoAririmetica(String expArit) {
+    private static boolean ehNumero(String str) {
+        if (str == null || str.isEmpty())
+            return false;
+        try {
+            Double.parseDouble(str);
+            return true;
+        } catch (NumberFormatException e) {
+            return false;
+        }
+    }
+
+    public static void validarExpressao(String expArit) throws Exception {
+        if (expArit == null || expArit.trim().isEmpty())
+            throw new Exception("Expressão vazia ou nula");
+    
+        expArit = expArit.replaceAll("\\s+", ""); // remove espaços
+        String operadores = "+-*/^";
+        int contParenteses = 0;
+        char prev = '\0';
+    
+        for (int i = 0; i < expArit.length(); i++) {
+            char c = expArit.charAt(i);
+            char next = (i + 1 < expArit.length()) ? expArit.charAt(i + 1) : '\0';
+    
+            // caracteres válidos
+            if (!Character.isDigit(c) && operadores.indexOf(c) == -1 && c != '(' && c != ')') {
+                throw new Exception("Caractere inválido: '" + c + "' na posição " + i);
+            }
+    
+            // parênteses balanceados
+            if (c == '(') {
+                contParenteses++;
+                if (next == ')')
+                    throw new Exception("Parêntese vazio '()' em posição " + i);
+            } else if (c == ')') {
+                contParenteses--;
+                if (contParenteses < 0)
+                    throw new Exception("Parêntese ')' sem abertura em posição " + i);
+                // operador antes de ')' ?
+                if (operadores.indexOf(prev) != -1)
+                    throw new Exception("Operador '" + prev + "' antes de ')' em posição " + (i - 1));
+            }
+    
+            // operador no início ou fim
+            if (operadores.indexOf(c) != -1) {
+                if (i == 0 || i == expArit.length() - 1)
+                    throw new Exception("Operador '" + c + "' em posição inválida");
+                if (operadores.indexOf(prev) != -1)
+                    throw new Exception("Operadores consecutivos: '" + prev + c + "' em posição " + (i - 1));
+                if (prev == '(')
+                    throw new Exception("Operador '" + c + "' após '(' em posição " + i);
+                if (next == ')')
+                    throw new Exception("Operador '" + c + "' antes de ')' em posição " + i);
+            }
+    
+            // número seguido de '('
+            if (Character.isDigit(prev) && c == '(')
+                throw new Exception("Falta operador entre número e '(' em posição " + (i - 1));
+    
+            // ')' seguido de número
+            if (prev == ')' && Character.isDigit(c))
+                throw new Exception("Falta operador entre ')' e número em posição " + (i - 1));
+    
+            prev = c;
+        }
+    
+        if (contParenteses != 0)
+            throw new Exception("Parênteses desbalanceados");
+    }
+    
+
+    public static List<No> fragmentarExpressaoAririmetica(String expArit) throws Exception {
+        // Valida antes de fragmentar
+        validarExpressao(expArit);
+
         expArit = expArit.replace(" ", "");
         String delimitadores = "+-*/^()";
         StringTokenizer separador = new StringTokenizer(expArit, delimitadores, true);
@@ -30,8 +104,10 @@ public class ArvoreExpressaoAritimetica {
     }
 
     private static void agruparNodos(List<No> vetor, String[] operadores) {
+
         boolean potencia = Arrays.asList(operadores).contains("^");
-        //tratar ^ da direita para a esquerda, porque quaso tratado da esquerda para direta o resultado  fica errado(2^3 fica 3^2)
+        // tratar ^ da direita para a esquerda, porque quaso tratado da esquerda para
+        // direta o resultado fica errado(2^3 fica 3^2)
         if (potencia) {
             for (int i = vetor.size() - 1; i >= 0; i--) {
                 No atual = vetor.get(i);
@@ -110,7 +186,8 @@ public class ArvoreExpressaoAritimetica {
                 }
             }
 
-            if (fechaParenteses == -1) break;
+            if (fechaParenteses == -1)
+                break;
 
             int abreParenteses = -1;
             for (int i = fechaParenteses; i >= 0; i--) {
@@ -120,16 +197,17 @@ public class ArvoreExpressaoAritimetica {
                 }
             }
 
-            if (abreParenteses == -1) break;
+            if (abreParenteses == -1)
+                break;
 
             List<No> sub = new ArrayList<>();
             for (int i = abreParenteses + 1; i < fechaParenteses; i++) {
                 sub.add(vetor.get(i));
             }
 
-            agruparNodos(sub, new String[]{"^"});
-            agruparNodos(sub, new String[]{"*", "/"});
-            agruparNodos(sub, new String[]{"+", "-"});
+            agruparNodos(sub, new String[] { "^" });
+            agruparNodos(sub, new String[] { "*", "/" });
+            agruparNodos(sub, new String[] { "+", "-" });
 
             No subArvore = sub.get(0);
 
@@ -138,15 +216,13 @@ public class ArvoreExpressaoAritimetica {
             for (int i = fechaParenteses; i > abreParenteses; i--) {
                 vetor.remove(i);
             }
-            
-            
 
             modificado = true;
         } while (modificado);
 
-        agruparNodos(vetor, new String[]{"^"});
-        agruparNodos(vetor, new String[]{"*", "/"});
-        agruparNodos(vetor, new String[]{"+", "-"});
+        agruparNodos(vetor, new String[] { "^" });
+        agruparNodos(vetor, new String[] { "*", "/" });
+        agruparNodos(vetor, new String[] { "+", "-" });
 
         return vetor.get(0);
     }
@@ -175,13 +251,18 @@ public class ArvoreExpressaoAritimetica {
         double dir = avaliar(raiz.dir);
 
         switch (raiz.valor) {
-            case "+": return esq + dir;
-            case "-": return esq - dir;
-            case "*": return esq * dir;
-            case "/": return esq / dir;
-            case "^": return Math.pow(esq, dir);
-            default: throw new IllegalArgumentException("Operador inválido: " + raiz.valor);
+            case "+":
+                return esq + dir;
+            case "-":
+                return esq - dir;
+            case "*":
+                return esq * dir;
+            case "/":
+                return esq / dir;
+            case "^":
+                return Math.pow(esq, dir);
+            default:
+                throw new IllegalArgumentException("Operador inválido: " + raiz.valor);
         }
     }
 }
-
