@@ -11,32 +11,44 @@ public class Main {
     */
 
     public static void main(String[] args) {
-        System.out.print("Digite a expressão: ");
         Scanner scanner = new Scanner(System.in);
-        String expressao = scanner.nextLine();
 
-        try {
-            var vetor = ArvoreExpressaoAritimetica.fragmentarExpressaoAririmetica(expressao);
+        while (true) {
+            System.out.print("Digite a expressão (ou digite '1' para encerrar): ");
+            String expressao = scanner.nextLine();
 
-            System.out.print("Vetor de nós: ");
-            for (int i = 0; i < vetor.size(); i++) {
-                System.out.print(vetor.get(i).valor);
-                if (i != vetor.size() - 1) {
-                    System.out.print(" | ");
-                }
+            if (expressao.equalsIgnoreCase("1")) {
+                System.out.println("Programa encerrado.");
+                break;
             }
+
+            try {
+                var vetor = ArvoreExpressaoAritimetica.fragmentarExpressaoAririmetica(expressao);
+
+                System.out.print("Vetor de nós: ");
+                for (int i = 0; i < vetor.size(); i++) {
+                    System.out.print(vetor.get(i).valor);
+                    if (i != vetor.size() - 1) {
+                        System.out.print(" | ");
+                    }
+                }
+                System.out.println();
+
+                var raiz = ArvoreExpressaoAritimetica.construirArvore(vetor);
+
+                System.out.println("Árvore binária desenhada:");
+                ArvoreExpressaoAritimetica.printarArvore(raiz);
+
+                double resultado = ArvoreExpressaoAritimetica.avaliar(raiz);
+                System.out.println("Resultado: " + resultado);
+
+            } catch (Exception e) {
+                System.out.println("Erro: " + e.getMessage());
+            }
+
             System.out.println(); 
-
-            var raiz = ArvoreExpressaoAritimetica.construirArvore(vetor);
-
-            System.out.println("Árvore binária desenhada:");
-            ArvoreExpressaoAritimetica.printarArvore(raiz);
-
-            double resultado = ArvoreExpressaoAritimetica.avaliar(raiz);
-            System.out.println("Resultado: " + resultado);
-
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
         }
+
+        scanner.close(); 
     }
 }
